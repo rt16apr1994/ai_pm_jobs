@@ -8,7 +8,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-pro')
 
 def search_jobs():
-    query = 'AI Product Manager remote India'
+    query = 'site:linkedin.com/jobs "AI Product Manager" remote India "posted 1 week ago"'
     with DDGS() as ddgs:
         return ddgs.text(query, max_results=10)
 
