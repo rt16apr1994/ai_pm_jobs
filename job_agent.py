@@ -4,7 +4,7 @@ from ddgs import DDGS
 
 def search_jobs():
     # Broader query to ensure we find SOMETHING for testing
-    query = 'AI Product Manager remote India'
+    query = 'site:linkedin.com/jobs "AI Product Manager" remote India "posted 1 week ago"'
     print(f"Searching for: {query}")
     
     with DDGS() as ddgs:
