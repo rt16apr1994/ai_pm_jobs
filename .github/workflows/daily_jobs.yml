@@ -19,7 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests ddgs --upgrade
+          pip install requests ddgs google-generativeai --upgrade
 
       - name: Run Job Agent
         env:
