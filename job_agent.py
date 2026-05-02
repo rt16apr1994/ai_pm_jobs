@@ -1,43 +1,44 @@
 import os
 import requests
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 def search_jobs():
-    # A more flexible query to ensure results
-    query = '"AI Product Manager" remote India'
-    results = []
+    # Broader query to ensure we find SOMETHING for testing
+    query = 'AI Product Manager remote India'
+    print(f"Searching for: {query}")
     
     with DDGS() as ddgs:
-        # Looking for recent results
-        resp = ddgs.text(query, max_results=10)
-        for r in resp:
-            results.append(r)
+        # Latest 2026 'text' method returns a list of dicts directly
+        results = ddgs.text(query, max_results=5)
+    
+    print(f"Found {len(results)} jobs.")
     return results
 
 def send_telegram(message):
     token = os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    
+    if not token or not chat_id:
+        print("Error: Missing TELEGRAM_TOKEN or TELEGRAM_CHAT_ID in GitHub Secrets.")
+        return
+
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id, 
         "text": message, 
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": False
+        "parse_mode": "Markdown"
     }
+    
     response = requests.post(url, json=payload)
-    return response.json()
+    print(f"Telegram Response: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
-    jobs = search_jobs()
+    job_results = search_jobs()
     
-    if jobs:
-        header = "*🚀 AI Product Manager Jobs (India/Remote)*\n\n"
-        job_list = []
-        for j in jobs:
-            job_list.append(f"🔹 [{j['title']}]({j['href']})")
-        
-        full_message = header + "\n\n".join(job_list)
-        send_telegram(full_message)
+    if job_results:
+        msg = "*🚀 Today's AI PM Jobs*\n\n"
+        for job in job_results:
+            msg += f"🔹 [{job['title']}]({job['href']})\n"
+        send_telegram(msg)
     else:
-        # Send a confirmation even if no jobs are found so you know it ran
-        send_telegram("✅ Job search completed, but no new listings were found for today.")
+        send_telegram("🔍 Search completed, but no jobs were found today.")
