@@ -1,32 +1,29 @@
 import os
 import requests
 from ddgs import DDGS
-import google.generativeai as genai
+from google import genai  # <--- New import style
 
-# Setup Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-2.5-flash')
+# Initialize the new Client
+# It automatically looks for GEMINI_API_KEY in your environment variables
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def search_jobs():
-    query = 'site:linkedin.com/jobs "AI Product Manager" remote India "posted 1 week ago"'
+    query = 'AI Product Manager remote India'
     with DDGS() as ddgs:
         return ddgs.text(query, max_results=10)
 
 def filter_with_ai(job_list):
-    # This is the "Agentic" prompt
     prompt = f"""
-    I am looking for "AI Product Manager" jobs that are Remote and based in or hiring from India.
-    Below is a list of raw search results. 
-    
-    Filter this list and return ONLY the jobs that are a 90% match for an AI Product Manager role.
-    For each matching job, provide the title and the link.
-    
-    Search Results:
-    {job_list}
-    
-    If no jobs match, simply say "NO_MATCH".
+    Filter the following job list for "AI Product Manager" roles that are Remote and based in India.
+    Results: {job_list}
+    If no matches, respond with "NO_MATCH".
     """
-    response = model.generate_content(prompt)
+    
+    # New method signature: client.models.generate_content
+    response = client.models.generate_content(
+        model='gemini-2.5-flash', 
+        contents=prompt
+    )
     return response.text
 
 def send_telegram(message):
@@ -39,11 +36,6 @@ def send_telegram(message):
 if __name__ == "__main__":
     raw_jobs = search_jobs()
     if raw_jobs:
-        # The Agent "thinks" here
         ai_analysis = filter_with_ai(raw_jobs)
-        
         if "NO_MATCH" not in ai_analysis:
-            header = "*🤖 AI Agent Analysis: Top Matches Found*\n\n"
-            send_telegram(header + ai_analysis)
-        else:
-            print("AI found no relevant matches today.")
+            send_telegram("*🚀 Agentic Filtered Jobs:*\n\n" + ai_analysis)
