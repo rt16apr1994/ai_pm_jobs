@@ -8,7 +8,7 @@ from google import genai  # <--- New import style
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def search_jobs():
-    query = 'AI Product Manager remote India'
+    query = 'site:linkedin.com/jobs "AI Product Manager" remote India "posted 1 week ago"'
     with DDGS() as ddgs:
         return ddgs.text(query, max_results=10)
 
