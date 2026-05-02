@@ -5,7 +5,7 @@ import google.generativeai as genai
 
 # Setup Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 def search_jobs():
     query = 'site:linkedin.com/jobs "AI Product Manager" remote India "posted 1 week ago"'
